@@ -2,6 +2,10 @@
   "name": "medium-links-collector",
   "version": "1.0.0",
   "description": "Crawl medium.com for links",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/skyshader/echo-sensex-crawler"
+  },
   "main": "crawl.js",
   "scripts": {
     "start": "node crawl.js"
@@ -13,6 +17,7 @@
   },
   "dependencies": {
     "bluebird": "^3.5.0",
-    "dotenv": "^4.0.0"
+    "cheerio": "^0.22.0",
+    "request": "^2.81.0"
   }
 }
