@@ -3,7 +3,8 @@ const throttledEach = require('./libs/throttledEach');
 const Crawler = require('./libs/crawler');
 const LinkParser = require('./libs/linkParser');
 const storeCSV = require('./libs/storeCSV');
-const RECURSIVE_FETCH_TIMES = 1;
+const RECURSIVE_FETCH_TIMES = 2;
+const CONCURRENT_REQUESTS = 5;
 
 let allFetchedLinks = [];
 
@@ -24,11 +25,13 @@ Promise.coroutine(function*() {
   let times = RECURSIVE_FETCH_TIMES;
 
   while(times--) {
-    links = yield throttledEach(links, 3, getLinksFromUrl);
+    links = yield throttledEach(links, CONCURRENT_REQUESTS, getLinksFromUrl);
 
-    allFetchedLinks = allFetchedLinks.concat(links.filter(function (link) {
+    links = links.filter(function (link) {
       return allFetchedLinks.indexOf(link) < 0;
-    }));
+    });
+
+    allFetchedLinks = allFetchedLinks.concat(links);
   }
 
   storeCSV(allFetchedLinks);
