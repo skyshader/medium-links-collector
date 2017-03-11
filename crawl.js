@@ -1,33 +1,39 @@
-// const Promise = require('bluebird');
+const Promise = require('bluebird');
+const throttledEach = require('./libs/throttledEach');
 const Crawler = require('./libs/crawler');
 const LinkParser = require('./libs/linkParser');
+const storeCSV = require('./libs/storeCSV');
+const RECURSIVE_FETCH_TIMES = 1;
 
-const crawler = new Crawler('https://medium.com');
-crawler.fetch()
-  .then(body => {
+let allFetchedLinks = [];
+
+const getLinksFromUrl = (url) => {
+  return Promise.coroutine(function*() {
+    const crawler = new Crawler(url);
+    const body = yield crawler.fetch();
+
     const linkParser = new LinkParser(body);
     return linkParser.parse();
-  })
-  .then(links => {
-    console.log(links);
+  })();
+};
+
+Promise.coroutine(function*() {
+  let links = yield getLinksFromUrl('https://medium.com');
+  allFetchedLinks = allFetchedLinks.concat(links);
+
+  let times = RECURSIVE_FETCH_TIMES;
+
+  while(times--) {
+    links = yield throttledEach(links, 3, getLinksFromUrl);
+
+    allFetchedLinks = allFetchedLinks.concat(links.filter(function (link) {
+      return allFetchedLinks.indexOf(link) < 0;
+    }));
+  }
+
+  storeCSV(allFetchedLinks);
+  console.log('Successfully fetched all links!');
+})()
+  .catch(err => {
+    console.error(err);
   });
-
-// const throttledEach = require('./libs/throttledEach');
-
-// const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-//
-// const executor = (elem) => {
-//   return new Promise((resolve) => {
-//     console.log('Executing task for elem:', elem);
-//
-//     setTimeout(() => {
-//       console.log('Execution completed for elem:', elem);
-//       return resolve();
-//     }, 2000);
-//   });
-// };
-//
-// throttledEach(arr, 3, executor)
-//   .then(() => {
-//     console.log('All tasks completed successfully!');
-//   });
