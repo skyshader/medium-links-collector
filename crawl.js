@@ -15,7 +15,11 @@ const getLinksFromUrl = (url) => {
 
     const linkParser = new LinkParser(body);
     return linkParser.parse();
-  })();
+  })()
+    .catch((err) => {
+      console.log('Error in fetching url:', err.message);
+      return [];
+    });
 };
 
 Promise.coroutine(function*() {
@@ -35,7 +39,7 @@ Promise.coroutine(function*() {
   }
 
   storeCSV(allFetchedLinks);
-  console.log('Successfully fetched all links!');
+  console.log('Successfully fetched all links!', allFetchedLinks.length);
 })()
   .catch(err => {
     console.error(err);
