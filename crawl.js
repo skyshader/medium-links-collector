@@ -13,7 +13,7 @@ Promise.coroutine(function*() {
 
   let times = RECURSIVE_FETCH_LIMIT;
 
-  while(times--) {
+  while(times-- && links.length > 0) {
     links = yield throttledEach(links, CONCURRENT_REQUEST_LIMIT, getLinksFromUrl);
 
     links = [].concat.apply([], links);
