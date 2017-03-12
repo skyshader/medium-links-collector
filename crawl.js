@@ -16,7 +16,9 @@ Promise.coroutine(function*() {
   while(times--) {
     links = yield throttledEach(links, CONCURRENT_REQUEST_LIMIT, getLinksFromUrl);
 
-    links = links.filter(function (link) {
+    links = [].concat.apply([], links);
+
+    links = links.filter((link) => {
       return allFetchedLinks.indexOf(link) < 0;
     });
 
